@@ -13,34 +13,42 @@
       --ring1: rgba(99,102,241,.25);
       --ring2: rgba(16,185,129,.25);
       --shadow: 0 10px 30px rgba(2,6,23,.12);
+      --outline: rgba(15,23,42,.06);   /* λεπτό “περίγραμμα” για να “κλείνουν” οι κάρτες */
       --radius-outer: 20px;
       --radius-inner: 16px;
 
       /* Ύψη/κενά (desktop) */
-      --header-h: 100px;   /* τίτλος/υπότιτλος */
-      --spacer-h: 8px;     /* κενάκι πάνω/κάτω */
-      --footer-h: 84px;    /* κάτω μήνυμα */
+      --header-h: 100px;
+      --spacer-h: 8px;
+      --footer-h: 88px;
     }
-    /* Mobile: λίγο μεγαλύτερο header για άνεση */
     @media (max-width: 480px){
       :root{
         --header-h: 86px;
-        --footer-h: 88px;
+        --footer-h: 90px;
       }
     }
 
     .wrap { max-width: 680px; margin: 0 auto; }
 
-    /* ===== Κοινό background για κάρτες ===== */
+    /* ===== Κοινή κάρτα (header/spacer/video/footer) ===== */
     .card-bg{
+      position: relative;
+      border-radius: var(--radius-outer);
+      box-shadow: var(--shadow);
       background:
         radial-gradient(140% 100% at 10% 0%, var(--ring1), transparent 60%),
         radial-gradient(140% 100% at 100% 20%, var(--ring2), transparent 60%),
         #ffffff;
-      box-shadow: var(--shadow);
-      border-radius: var(--radius-outer);
       overflow: hidden;
-      position: relative;
+    }
+    /* Λεπτό περίγραμμα για να “κλείνει” οπτικά η κάρτα */
+    .card-bg::after{
+      content:"";
+      position:absolute; inset:0;
+      border-radius: inherit;
+      box-shadow: inset 0 0 0 1px var(--outline);
+      pointer-events:none;
     }
 
     /* ===== HEADER (Τίτλος/Υπότιτλος) ===== */
@@ -51,13 +59,13 @@
     .panel-inner{
       position:absolute; inset:8px; border-radius:14px;
       background: linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.75));
-      box-shadow: inset 0 0 0 1px rgba(15,23,42,.06);
+      box-shadow: inset 0 0 0 1px var(--outline);
+      pointer-events:none;
     }
     .header-content{
       position: relative; z-index:1; width:100%;
       padding: 6px 14px; text-align:center; overflow:hidden;
     }
-    /* βασικά μεγέθη (ταιριάζουν στο mobile και μικρά desktop) */
     .title{
       margin:0 0 4px; font-weight:800; color:#0f172a;
       font-size: clamp(16px, 2.6vw, 22px);
@@ -68,19 +76,17 @@
       font-size: clamp(12px, 1.9vw, 16px);
       line-height: 1.2;
     }
-    /* Μεγαλύτερα μόνο σε φαρδιά desktop */
     @media (min-width: 1024px){
       .title{ font-size: 26px; }
       .subtitle{ font-size: 17px; }
     }
 
-    /* ===== Spacer ===== */
-    .spacer{
+    /* ===== Spacer (σταθερό κενό, χωρίς αρνητικά margins) ===== */
+    .spacers{ display:flex; flex-direction:column; gap: 10px; }
+    .spacer.card-bg{
       height: var(--spacer-h);
-      margin: -1px 0 10px;                 /* μικρή επικάλυψη για να μην φανούν “ραφές” */
       border-radius: 10px;
     }
-    .spacer.card-bg{ border-radius:10px; }
 
     /* ===== Τετράγωνο Video 1:1 ===== */
     .frame.card-bg{ padding:12px; }
@@ -95,7 +101,7 @@
       height:100%; width:177.78%;                 /* 16:9 → cover */
       transform:translate(-50%,-50%) scaleX(1.02);
       transform-origin:center; border:0; display:block; background:transparent;
-      pointer-events:none;                         /* βγάλ’ το αν θες χειρισμό controls */
+      pointer-events:none;                         /* βγάλ’ το αν θες controls με κλικ */
     }
     .clickthrough{
       position:absolute; inset:0; z-index:2; display:block; text-decoration:none; cursor:pointer;
@@ -106,7 +112,7 @@
       height: var(--footer-h);
       display:grid; place-items:center;
     }
-    .footer .panel-inner{ inset:10px; }
+    .footer .panel-inner{ inset:8px; }   /* ίδιο inset με header */
     .footer-content{
       position: relative; z-index:1; width:100%;
       padding: 8px 14px; text-align:center; overflow:hidden;
@@ -124,7 +130,6 @@
           radial-gradient(140% 100% at 10% 0%, rgba(99,102,241,.35), transparent 60%),
           radial-gradient(140% 100% at 100% 20%, rgba(16,185,129,.35), transparent 60%),
           #0f172a;
-        box-shadow: 0 12px 40px rgba(0,0,0,.45);
       }
       .panel-inner{ background: linear-gradient(180deg, rgba(17,24,39,.65), rgba(17,24,39,.55)); }
       .title, .footer-text{ color:#e5e7eb; }
@@ -144,31 +149,31 @@
       </div>
     </div>
 
-    <!-- Spacer -->
-    <div class="spacer card-bg"></div>
+    <!-- Spacers + Βίντεο + Spacers (χωρίς “ραφές”) -->
+    <div class="spacers">
+      <div class="spacer card-bg"></div>
 
-    <!-- Τετράγωνο βίντεο 1:1 -->
-    <div class="frame card-bg">
-      <div class="square">
-        <div class="player-fit">
-          <iframe
-            src="https://www.youtube.com/embed/hoWjbZ95eLI?autoplay=1&mute=1&loop=1&playlist=hoWjbZ95eLI&rel=0&playsinline=1&controls=1&modestbranding=1"
-            title="YouTube video"
-            allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen></iframe>
+      <div class="frame card-bg">
+        <div class="square">
+          <div class="player-fit">
+            <iframe
+              src="https://www.youtube.com/embed/hoWjbZ95eLI?autoplay=1&mute=1&loop=1&playlist=hoWjbZ95eLI&rel=0&playsinline=1&controls=1&modestbranding=1"
+              title="YouTube video"
+              allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen></iframe>
 
-          <a class="clickthrough"
-             href="https://fairygift.gr/collections/prototypa-xrisima-dora-neogennita-genethlia-giorti-vaptisi-mora-vrefi"
-             target="_blank" rel="nofollow noopener"
-             aria-label="Δες τη συλλογή δώρων"></a>
+            <a class="clickthrough"
+               href="https://fairygift.gr/collections/prototypa-xrisima-dora-neogennita-genethlia-giorti-vaptisi-mora-vrefi"
+               target="_blank" rel="nofollow noopener"
+               aria-label="Δες τη συλλογή δώρων"></a>
+          </div>
         </div>
       </div>
+
+      <div class="spacer card-bg"></div>
     </div>
 
-    <!-- Spacer -->
-    <div class="spacer card-bg"></div>
-
-    <!-- Κάτω πλαίσιο: μήνυμα -->
+    <!-- Κάτω πλαίσιο: Μήνυμα -->
     <div class="footer card-bg">
       <div class="panel-inner"></div>
       <div class="footer-content">
