@@ -5,48 +5,48 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>FairyGift Video Embed</title>
   <style>
-    /* --------- Βασικά --------- */
+    /* Φυσική ροή, χωρίς περιθώρια */
     html, body { margin:0; padding:0; background:transparent; }
 
+    /* Κοινά χρώματα/ύφος */
     :root{
       --ring1: rgba(99,102,241,.25);
       --ring2: rgba(16,185,129,.25);
+      --card: #ecfdf5;          /* γαλαζοπράσινο που θες */
       --shadow: 0 10px 30px rgba(2,6,23,.12);
       --radius-outer: 20px;
       --radius-inner: 16px;
 
-      /* ΣΤΑΘΕΡΟ ύψος header (ταιριάζει με το iframe wrapper στο blog) */
-      --header-h: 90px;         /* desktop */
-      --spacer-h: 8px;          /* μικρό κενάκι ανάμεσα στα δύο πλαίσια */
+      /* ΣΤΑΘΕΡΟ ύψος header (ταιριάζει με το iframe πιο κάτω) */
+      --header-h: 90px;
     }
     @media (max-width: 480px){
-      :root{ --header-h: 70px; } /* πιο χαμηλό header σε κινητό */
+      :root{ --header-h: 70px; } /* λίγο πιο χαμηλό στο κινητό */
     }
 
-    /* --------- HEADER (ορθογώνιο) --------- */
+    /* Header κάρτα */
     .header{
-      max-width: 680px; margin: 0 auto; position: relative;
-      height: var(--header-h);           /* το συνολικό ύψος του header */
-      border-radius: var(--radius-outer);
-      box-shadow: var(--shadow);
+      max-width: 680px; margin: 0 auto 12px; position: relative;
       background:
         radial-gradient(140% 100% at 10% 0%, var(--ring1), transparent 60%),
         radial-gradient(140% 100% at 100% 20%, var(--ring2), transparent 60%),
         #ffffff;
-      display:flex; align-items:center; justify-content:center;
-      text-align:center;
+      border-radius: var(--radius-outer);
+      box-shadow: var(--shadow);
+      padding: 10px 14px;
+      height: var(--header-h);
+      display: flex; align-items: center; justify-content: center;
+      text-align: center;
     }
     .header-inner{
-      /* γεμίζει ΟΛΟ το header χωρίς “λευκή στεφάνη” */
-      width: calc(100% - 24px);
-      height: calc(100% - 16px);
-      margin: 8px auto;
-      border-radius: 14px;
-      box-sizing: border-box;
-      padding: 6px 10px;
-      display:flex; flex-direction:column; align-items:center; justify-content:center;
       background: linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.75));
+      border-radius: 14px;
+      width: 100%;
+      height: calc(100% - 16px);
+      margin: 8px 0;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
       box-shadow: inset 0 0 0 1px rgba(15,23,42,.06);
+      padding: 6px 10px;
     }
     .title{
       margin:0 0 4px; font-weight:800; color:#0f172a;
@@ -56,58 +56,47 @@
       margin:0; color:#64748b; font-size: clamp(12px, 1.6vw, 14px);
     }
 
-    /* --------- ΜΙΚΡΟ SPACER (ίδιο background) --------- */
-    .between-spacer{
-      height: var(--spacer-h);
-      max-width: 680px; margin: 8px auto 10px;  /* μικρό “αναπνευστικό” */
-      border-radius: 10px;
-      box-shadow: var(--shadow);
+    /* Τετράγωνο βίντεο 1:1 με ίδιο frame/σκιές */
+    .frame{
+      max-width: 680px; margin: 0 auto; position: relative;
       background:
         radial-gradient(140% 100% at 10% 0%, var(--ring1), transparent 60%),
         radial-gradient(140% 100% at 100% 20%, var(--ring2), transparent 60%),
         #ffffff;
-    }
-
-    /* --------- ΤΕΤΡΑΓΩΝΟ VIDEO (1:1) --------- */
-    .frame{
-      max-width: 680px; margin: 0 auto; position: relative;
       border-radius: var(--radius-outer);
       box-shadow: var(--shadow);
       padding: 12px;
-      background:
-        radial-gradient(140% 100% at 10% 0%, var(--ring1), transparent 60%),
-        radial-gradient(140% 100% at 100% 20%, var(--ring2), transparent 60%),
-        #ffffff;
     }
     .square{
       width: 100%;
-      aspect-ratio: 1 / 1;                /* τετράγωνο */
+      aspect-ratio: 1 / 1;            /* ΤΕΤΡΑΓΩΝΟ */
       border-radius: var(--radius-inner);
       overflow: hidden;
       background: #000;
       position: relative;
     }
 
-    /* Γέμισμα 1:1 από 16:9 video (cover) */
-    .player-fit{ position:absolute; inset:0; overflow:hidden; }
+    /* Γέμισμα του 1:1 από 16:9 video (cover) */
+    .player-fit{
+      position:absolute; inset:0; overflow:hidden;
+    }
     .player-fit iframe{
       position:absolute; top:50%; left:50%;
       height:100%;
-      width:177.78%;                       /* 16/9 ως ποσοστό του ύψους */
+      width:177.78%;                         /* 16/9 ως ποσοστό του ύψους */
       transform:translate(-50%,-50%) scaleX(1.02);
       transform-origin:center;
       border:0; display:block; background:transparent;
-      pointer-events:none;                  /* βγάλ’ το αν θες χειρισμό controls */
+      pointer-events:none; /* βγάλ’ το αν θες χειρισμό controls με κλικ */
     }
 
-    /* Ολο το video κλικάρει προς το shop (προαιρετικό) */
+    /* Προαιρετικό: κλικ σε όλη την επιφάνεια του video */
     .clickthrough{
       position:absolute; inset:0; z-index:2; display:block; text-decoration:none; cursor:pointer;
     }
 
-    /* Dark mode tweaks */
     @media (prefers-color-scheme: dark){
-      .header, .between-spacer, .frame{
+      .header, .frame{
         background:
           radial-gradient(140% 100% at 10% 0%, rgba(99,102,241,.35), transparent 60%),
           radial-gradient(140% 100% at 100% 20%, rgba(16,185,129,.35), transparent 60%),
@@ -120,7 +109,7 @@
   </style>
 </head>
 <body>
-  <!-- ΟΡΘΟΓΩΝΙΟ HEADER -->
+  <!-- ΟΡΘΟΓΩΝΙΟ HEADER (ανεξάρτητο από το τετράγωνο) -->
   <div class="header">
     <div class="header-inner">
       <h3 class="title">Η ευχή σου είναι ξεχωριστή… το δώρο σου όμως είναι?? 🎁</h3>
@@ -128,10 +117,7 @@
     </div>
   </div>
 
-  <!-- ΜΙΚΡΟ SPACER με ίδιο background -->
-  <div class="between-spacer"></div>
-
-  <!-- ΤΕΤΡΑΓΩΝΟ VIDEO 1:1 -->
+  <!-- ΤΕΤΡΑΓΩΝΟ VIDEO (1:1) -->
   <div class="frame">
     <div class="square">
       <div class="player-fit">
