@@ -5,124 +5,132 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>FairyGift Video Embed</title>
   <style>
-    /* Καθαρό canvas – χωρίς scrollbars */
-    html, body { margin:0; padding:0; height:100%; overflow:hidden; background:transparent; }
+    /* Φυσική ροή, χωρίς περιθώρια */
+    html, body { margin:0; padding:0; background:transparent; }
 
-    /* Ολόκληρο το iframe γεμίζει και κεντράρει το τετράγωνο πλαίσιο */
-    .embed-root{
-      position:fixed; inset:0; display:grid; place-items:center; background:transparent; overflow:hidden;
+    /* Κοινά χρώματα/ύφος */
+    :root{
+      --ring1: rgba(99,102,241,.25);
+      --ring2: rgba(16,185,129,.25);
+      --card: #ecfdf5;          /* γαλαζοπράσινο που θες */
+      --shadow: 0 10px 30px rgba(2,6,23,.12);
+      --radius-outer: 20px;
+      --radius-inner: 16px;
+
+      /* ΣΤΑΘΕΡΟ ύψος header (ταιριάζει με το iframe πιο κάτω) */
+      --header-h: 90px;
+    }
+    @media (max-width: 480px){
+      :root{ --header-h: 70px; } /* λίγο πιο χαμηλό στο κινητό */
     }
 
-    /* ΤΕΤΡΑΓΩΝΟ πλαίσιο (1:1) με διακοσμητικό background και σκιές */
-    .frame{
-      position:relative;
-      width:100vmin; height:100vmin;           /* πάντα τέλειο 1:1 */
-      max-width:680px; max-height:680px;
-      border-radius:20px;
-      box-shadow:0 10px 30px rgba(2,6,23,.12);
-      background:
-        radial-gradient(140% 100% at 10% 0%, rgba(99,102,241,.25), transparent 60%),
-        radial-gradient(140% 100% at 100% 20%, rgba(16,185,129,.25), transparent 60%),
-        #ecfdf5; /* απαλό γαλαζοπράσινο */
-      overflow:hidden;
-    }
-
-    /* Δομή 2 ζωνών μέσα στο 1:1: header (πάνω) + video (κάτω) */
-    .frame-inner{
-      position:absolute; inset:12px; border-radius:16px; overflow:hidden;
-      display:grid;
-      grid-template-rows: 0.14fr 0.86fr; /* ~14% τίτλοι, ~86% βίντεο */
-      gap:10px;
-    }
-
-    /* Header (τίτλος/υπότιτλος) */
+    /* Header κάρτα */
     .header{
-      border-radius:14px;
+      max-width: 680px; margin: 0 auto 12px; position: relative;
       background:
-        linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.75));
+        radial-gradient(140% 100% at 10% 0%, var(--ring1), transparent 60%),
+        radial-gradient(140% 100% at 100% 20%, var(--ring2), transparent 60%),
+        #ffffff;
+      border-radius: var(--radius-outer);
+      box-shadow: var(--shadow);
+      padding: 10px 14px;
+      height: var(--header-h);
+      display: flex; align-items: center; justify-content: center;
+      text-align: center;
+    }
+    .header-inner{
+      background: linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.75));
+      border-radius: 14px;
+      width: 100%;
+      height: calc(100% - 16px);
+      margin: 8px 0;
       display:flex; flex-direction:column; align-items:center; justify-content:center;
-      padding:10px 12px; text-align:center;
       box-shadow: inset 0 0 0 1px rgba(15,23,42,.06);
+      padding: 6px 10px;
     }
     .title{
-      margin:0 0 4px; font-weight:800;
+      margin:0 0 4px; font-weight:800; color:#0f172a;
       font-size: clamp(16px, 2.2vw, 20px);
-      color:#0f172a;
     }
     .subtitle{
-      margin:0; color:#64748b;
-      font-size: clamp(12px, 1.6vw, 14px);
+      margin:0; color:#64748b; font-size: clamp(12px, 1.6vw, 14px);
     }
 
-    /* Περιοχή βίντεο – καλύπτει ολόκληρη τη ζώνη του χωρίς μαύρες μπάρες */
-    .player-zone{ position:relative; border-radius:14px; overflow:hidden; background:#000; }
+    /* Τετράγωνο βίντεο 1:1 με ίδιο frame/σκιές */
+    .frame{
+      max-width: 680px; margin: 0 auto; position: relative;
+      background:
+        radial-gradient(140% 100% at 10% 0%, var(--ring1), transparent 60%),
+        radial-gradient(140% 100% at 100% 20%, var(--ring2), transparent 60%),
+        #ffffff;
+      border-radius: var(--radius-outer);
+      box-shadow: var(--shadow);
+      padding: 12px;
+    }
+    .square{
+      width: 100%;
+      aspect-ratio: 1 / 1;            /* ΤΕΤΡΑΓΩΝΟ */
+      border-radius: var(--radius-inner);
+      overflow: hidden;
+      background: #000;
+      position: relative;
+    }
 
+    /* Γέμισμα του 1:1 από 16:9 video (cover) */
     .player-fit{
       position:absolute; inset:0; overflow:hidden;
     }
     .player-fit iframe{
       position:absolute; top:50%; left:50%;
       height:100%;
-      width:177.78%;                     /* 16:9 ως ποσοστό του ύψους → cover */
-      transform:translate(-50%,-50%) scaleX(1.02); /* μικρό fill για να μη φανούν άκρες */
+      width:177.78%;                         /* 16/9 ως ποσοστό του ύψους */
+      transform:translate(-50%,-50%) scaleX(1.02);
       transform-origin:center;
       border:0; display:block; background:transparent;
-      pointer-events:none; /* αφαίρεσέ το αν θέλεις χειρισμό controls με κλικ */
+      pointer-events:none; /* βγάλ’ το αν θες χειρισμό controls με κλικ */
     }
 
-    /* Click-through προς shop (προαιρετικό) */
+    /* Προαιρετικό: κλικ σε όλη την επιφάνεια του video */
     .clickthrough{
       position:absolute; inset:0; z-index:2; display:block; text-decoration:none; cursor:pointer;
     }
 
     @media (prefers-color-scheme: dark){
-      .frame{
+      .header, .frame{
         background:
           radial-gradient(140% 100% at 10% 0%, rgba(99,102,241,.35), transparent 60%),
           radial-gradient(140% 100% at 100% 20%, rgba(16,185,129,.35), transparent 60%),
           #0f172a;
-        box-shadow:0 12px 40px rgba(0,0,0,.45);
+        box-shadow: 0 12px 40px rgba(0,0,0,.45);
       }
-      .header{ background:linear-gradient(180deg, rgba(17,24,39,.65), rgba(17,24,39,.55)); }
       .title{ color:#e5e7eb; }
       .subtitle{ color:#9ca3af; }
-    }
-
-    @media (max-width:420px){
-      .frame{ border-radius:16px; }
-      .frame-inner{ inset:10px; border-radius:12px; gap:8px; }
-      .header{ border-radius:12px; }
-      .player-zone{ border-radius:12px; }
     }
   </style>
 </head>
 <body>
-  <div class="embed-root">
-    <div class="frame">
-      <div class="frame-inner">
-        <!-- ===== Header (ΤΙΤΛΟΣ + ΥΠΟΤΙΤΛΟΣ) ===== -->
-        <div class="header">
-          <h3 class="title">Η ευχή σου είναι ξεχωριστή… το δώρο σου όμως είναι?? 🎁</h3>
-          <p class="subtitle">Ένα προσωποποιημένο δώρο ξεχωρίζει από τα συνηθισμένα!!</p>
-        </div>
+  <!-- ΟΡΘΟΓΩΝΙΟ HEADER (ανεξάρτητο από το τετράγωνο) -->
+  <div class="header">
+    <div class="header-inner">
+      <h3 class="title">Η ευχή σου είναι ξεχωριστή… το δώρο σου όμως είναι?? 🎁</h3>
+      <p class="subtitle">Ένα προσωποποιημένο δώρο ξεχωρίζει από τα συνηθισμένα!!</p>
+    </div>
+  </div>
 
-        <!-- ===== Video (1:1 περιοχή) ===== -->
-        <div class="player-zone">
-          <div class="player-fit">
-            <iframe
-              src="https://www.youtube.com/embed/hoWjbZ95eLI?autoplay=1&mute=1&loop=1&playlist=hoWjbZ95eLI&rel=0&playsinline=1&controls=1&modestbranding=1"
-              title="YouTube video"
-              allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowfullscreen></iframe>
+  <!-- ΤΕΤΡΑΓΩΝΟ VIDEO (1:1) -->
+  <div class="frame">
+    <div class="square">
+      <div class="player-fit">
+        <iframe
+          src="https://www.youtube.com/embed/hoWjbZ95eLI?autoplay=1&mute=1&loop=1&playlist=hoWjbZ95eLI&rel=0&playsinline=1&controls=1&modestbranding=1"
+          title="YouTube video"
+          allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen></iframe>
 
-            <!-- Αν θες όλο το βίντεο να οδηγεί στο shop, άσε αυτό ενεργό -->
-            <a class="clickthrough"
-               href="https://fairygift.gr/collections/prototypa-xrisima-dora-neogennita-genethlia-giorti-vaptisi-mora-vrefi"
-               target="_blank" rel="nofollow noopener"
-               aria-label="Δες τη συλλογή δώρων"></a>
-          </div>
-        </div>
-
+        <a class="clickthrough"
+           href="https://fairygift.gr/collections/prototypa-xrisima-dora-neogennita-genethlia-giorti-vaptisi-mora-vrefi"
+           target="_blank" rel="nofollow noopener"
+           aria-label="Δες τη συλλογή δώρων"></a>
       </div>
     </div>
   </div>
