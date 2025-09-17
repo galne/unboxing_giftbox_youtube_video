@@ -3,127 +3,73 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Gift Hook + Video</title>
+  <title>Video Embed</title>
   <style>
-    /* ---------- Reset / Fix scrollbars ---------- */
+    /* Καθαρό canvas: χωρίς scrollbars/περιθώρια, διάφανο φόντο */
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
-      overflow: hidden; /* καμία κύλιση */
+      overflow: hidden;       /* καμία κύλιση */
+      background: transparent;
     }
 
-    /* ---------- Design tokens ---------- */
-    .gift-hook {
-      --bg: #ffffff;
-      --fg: #0f172a;
-      --muted: #64748b;
-      --card: #ffffff;
-      --ring1: rgba(99,102,241,0.25);
-      --ring2: rgba(16,185,129,0.25);
-      --shadow: 0 10px 30px rgba(2,6,23,.12);
-    }
-    @media (prefers-color-scheme: dark) {
-      .gift-hook {
-        --bg: #0b1220;
-        --fg: #e5e7eb;
-        --muted: #9ca3af;
-        --card: #0f172a;
-        --ring1: rgba(99,102,241,0.35);
-        --ring2: rgba(16,185,129,0.35);
-        --shadow: 0 12px 40px rgba(0,0,0,.45);
-      }
-    }
-
-    /* ---------- Layout / card ---------- */
-    .gift-hook {
-      background: var(--bg);
-      color: var(--fg);
-      padding: 0; /* αφαιρούμε padding για να μην περισσεύει τίποτα */
-    }
-    .gift-card {
-      max-width: 680px;
-      margin: 0 auto;
-      background: var(--card);
-      border-radius: 20px;
-      box-shadow: var(--shadow);
-      position: relative;
+    /* Γεμίζουμε 100% το iframe viewport */
+    .embed-root {
+      position: fixed;
+      inset: 0;
       overflow: hidden;
-      isolation: isolate;
     }
-    .gift-card::before {
-      content: "";
+
+    /* Γεμίζει το τετράγωνο χωρίς μαύρες μπάρες
+       -> κάνουμε scale το 16:9 video ώστε να καλύψει το 1:1 (crop στα πλάγια) */
+    .player-fit {
+      --zoomX: 1.02;     /* οριζόντιο γέμισμα (μικρό fine-tune) */
       position: absolute;
-      inset: -2px;
-      background: radial-gradient(100% 70% at 10% 0%, var(--ring1), transparent 60%),
-                  radial-gradient(120% 80% at 100% 20%, var(--ring2), transparent 60%);
-      filter: blur(18px);
-      z-index: -1;
-    }
-
-    /* ---------- Typography ---------- */
-    .gift-header { margin: 0 0 12px; text-align: center; }
-    .gift-title  { font-size: clamp(20px, 2.6vw, 28px); font-weight: 800; margin: 0 0 6px; }
-    .gift-subtitle { font-size: clamp(14px, 1.6vw, 16px); color: var(--muted); margin: 0; }
-
-    /* ---------- Video ---------- */
-    .video-wrap {
-      position: relative;
-      width: 100%; max-width: 100%;
-      aspect-ratio: 1 / 1;
-      border-radius: 16px;
+      inset: 0;
       overflow: hidden;
-      background: #000;
     }
-    @supports not (aspect-ratio: 1 / 1) {
-      .video-wrap::before { content: ""; display: block; padding-top: 100%; }
-    }
-
-    .player-zoom {
-      --zoomX: 1.02;
-      --panX: 50%;
-      --safeY: 8%;
-      position: absolute; inset: 0;
-      height: calc(100% - var(--safeY));
+    .player-fit iframe {
+      /* κόλπο: πλάτος = 16/9 * ύψος => 177.78% του ύψους, ώστε να μην φανούν πλαϊνές μπάρες */
+      position: absolute;
       width: 177.78%;
-      left: var(--panX);
-      top: 40%;
-      transform: translate(calc(-1 * var(--panX)), -50%) scaleX(var(--zoomX));
+      height: 100%;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) scaleX(var(--zoomX));
       transform-origin: center center;
-      z-index: 1;
-    }
-    .player-zoom iframe {
-      width: 100%; height: 100%; border: 0; display: block;
-      pointer-events: none !important;
-    }
-
-    .video-wrap .video-link {
-      position: absolute; inset: 0; z-index: 2;
-      display: block; text-decoration: none; cursor: pointer;
+      border: 0;
+      display: block;
+      background: transparent;
+      pointer-events: none;   /* αν ΘΕΣ controls, αφαίρεσέ το */
     }
 
-    @media (max-width: 420px) { .video-wrap{ border-radius: 12px; } }
-    @media (prefers-reduced-motion: reduce){ .gift-card::before{ display:none; } }
+    /* Κλικάρισμα όλης της επιφάνειας προς το shop (προαιρετικό) */
+    .clickthrough {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      display: block;
+      text-decoration: none;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
-  <section class="gift-hook">
-    <div class="gift-card">
-      <header class="gift-header">
-        <h2 class="gift-title">Η ευχή σου είναι ξεχωριστή… το δώρο σου όμως είναι?? 🎁</h2>
-        <p class="gift-subtitle">Ένα προσωποποιημένο δώρο ξεχωρίζει από τα συνηθισμένα!!</p>
-      </header>
+  <div class="embed-root">
+    <div class="player-fit">
+      <iframe
+        src="https://www.youtube.com/embed/hoWjbZ95eLI?autoplay=1&mute=1&loop=1&playlist=hoWjbZ95eLI&rel=0&playsinline=1&controls=1&modestbranding=1"
+        title="YouTube video"
+        allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen></iframe>
 
-      <div class="video-wrap">
-        <div class="player-zoom">
-          <iframe src="https://www.youtube.com/embed/hoWjbZ95eLI?autoplay=1&mute=1&loop=1&playlist=hoWjbZ95eLI&rel=0&playsinline=1&controls=1&modestbranding=1"
-            title="YouTube video"
-            allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen></iframe>
-        </div>
-        <a class="video-link" href="https://fairygift.gr/collections/prototypa-xrisima-dora-neogennita-genethlia-giorti-vaptisi-mora-vrefi" target="_blank" rel="nofollow noopener" aria-label="Δες τη συλλογή δώρων"></a>
-      </div>
+      <!-- Προαιρετικό: κάνε όλο το βίντεο κλικάρισμα προς το shop -->
+      <a class="clickthrough"
+         href="https://fairygift.gr/collections/prototypa-xrisima-dora-neogennita-genethlia-giorti-vaptisi-mora-vrefi"
+         target="_blank" rel="nofollow noopener"
+         aria-label="Δες τη συλλογή δώρων"></a>
     </div>
-  </section>
+  </div>
 </body>
 </html>
