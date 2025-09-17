@@ -16,10 +16,11 @@
       --radius-outer: 20px;
       --radius-inner: 16px;
 
-      /* Σταθερές ώστε να μην αλλάζει το layout */
-      --header-h: 90px;    /* desktop ύψος header */
-      --spacer-h: 8px;     /* μικρό κενό ανάμεσα στα πλαίσια */
+      /* Ύψη */
+      --header-h: 100px;   /* desktop: λίγο πιο ψηλό ώστε να χωράνε άνετα τα μεγαλύτερα γράμματα */
+      --spacer-h: 8px;     /* μικρό κενάκι ανάμεσα στα πλαίσια */
     }
+    /* Στο κινητό κρατάμε όπως ήταν */
     @media (max-width: 480px){
       :root{ --header-h: 70px; }
     }
@@ -39,7 +40,7 @@
         radial-gradient(140% 100% at 100% 20%, var(--ring2), transparent 60%),
         #ffffff;
     }
-    /* Εσωτερικό “panel” με ::before – δεν αφήνει λευκή στεφάνη */
+    /* Εσωτερικό panel με ::before – χωρίς λευκές άκρες */
     .header::before{
       content:"";
       position:absolute; inset:8px;
@@ -49,18 +50,26 @@
     }
     .header-content{
       position: relative; z-index:1;           /* επάνω από το ::before */
-      text-align:center; padding:6px 10px; width: 100%;
+      text-align:center; padding:6px 12px; width: 100%;
       overflow: hidden;                         /* clip γράμματα */
     }
+
+    /* ΤΥΠΟΓΡΑΦΙΑ – βασικά (κινητό & μικρές οθόνες) */
     .title{
       margin:0 0 4px; font-weight:800; color:#0f172a;
-      font-size: clamp(16px, 2.2vw, 20px);
-      line-height: 1.2;
+      font-size: clamp(16px, 2.6vw, 20px);
+      line-height: 1.18;
       text-wrap: balance;
     }
     .subtitle{
-      margin:0; color:#64748b; font-size: clamp(12px, 1.6vw, 14px);
+      margin:0; color:#64748b;
+      font-size: clamp(12px, 1.9vw, 14px);
       line-height: 1.2;
+    }
+    /* ΜΟΝΟ ΓΙΑ DESKTOP – πιο μεγάλα αλλά εντός πλαισίου */
+    @media (min-width: 900px){
+      .title{ font-size: 26px; }
+      .subtitle{ font-size: 17px; }
     }
 
     /* --------- SPACER (ίδιο background, χωρίς “ραφές”) --------- */
@@ -72,8 +81,7 @@
         radial-gradient(140% 100% at 10% 0%, var(--ring1), transparent 60%),
         radial-gradient(140% 100% at 100% 20%, var(--ring2), transparent 60%),
         #ffffff;
-      /* Ελαφριά επικάλυψη ώστε να μη φαίνεται ποτέ γραμμή μεταξύ των πλαισίων */
-      margin: -1px 0 10px;   /* -1px πάνω, 10px κάτω */
+      margin: -1px 0 10px;   /* μικρή επικάλυψη για να μη φαίνεται γραμμή */
     }
 
     /* --------- ΤΕΤΡΑΓΩΝΟ VIDEO (1:1) --------- */
