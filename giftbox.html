@@ -5,68 +5,94 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>FairyGift Video Embed</title>
   <style>
-    /* Μηδενικά, χωρίς scrollbars */
+    /* Καθαρό canvas – χωρίς scrollbars */
     html, body { margin:0; padding:0; height:100%; overflow:hidden; background:transparent; }
 
-    /* Τετράγωνο καμβάς που γεμίζει 100% το iframe viewport */
+    /* Ολόκληρο το iframe γεμίζει και κεντράρει το τετράγωνο πλαίσιο */
     .embed-root{
-      position:fixed; inset:0; overflow:hidden;
-      display:grid; place-items:center;
-      background:transparent;
+      position:fixed; inset:0; display:grid; place-items:center; background:transparent; overflow:hidden;
     }
 
-    /* Διακοσμητικό frame (χωρίς header κείμενα για να μην αυξάνει ύψος) */
+    /* ΤΕΤΡΑΓΩΝΟ πλαίσιο (1:1) με διακοσμητικό background και σκιές */
     .frame{
       position:relative;
-      width:100vmin; height:100vmin;              /* πάντα τέλειο τετράγωνο */
-      max-width:680px; max-height:680px;          /* ίδιο cap με πριν */
+      width:100vmin; height:100vmin;           /* πάντα τέλειο 1:1 */
+      max-width:680px; max-height:680px;
       border-radius:20px;
       box-shadow:0 10px 30px rgba(2,6,23,.12);
-      background: radial-gradient(140% 100% at 10% 0%, rgba(99,102,241,.25), transparent 60%),
-                  radial-gradient(140% 100% at 100% 20%, rgba(16,185,129,.25), transparent 60%),
-                  #ffffff;
+      background:
+        radial-gradient(140% 100% at 10% 0%, rgba(99,102,241,.25), transparent 60%),
+        radial-gradient(140% 100% at 100% 20%, rgba(16,185,129,.25), transparent 60%),
+        #ecfdf5; /* απαλό γαλαζοπράσινο */
       overflow:hidden;
     }
 
-    /* Εσωτερικό padding ώστε να φαίνεται σαν «κάρτα» γύρω από το βίντεο */
+    /* Δομή 2 ζωνών μέσα στο 1:1: header (πάνω) + video (κάτω) */
     .frame-inner{
-      position:absolute; inset:14px;              /* γύρω-γύρω ίδιο «μαξιλάρι» */
-      border-radius:16px; background:#000;        /* μαύρο φόντο κάτω από το video */
-      overflow:hidden;
+      position:absolute; inset:12px; border-radius:16px; overflow:hidden;
+      display:grid;
+      grid-template-rows: 0.14fr 0.86fr; /* ~14% τίτλοι, ~86% βίντεο */
+      gap:10px;
     }
 
-    /* Γεμίζουμε το τετράγωνο χωρίς πλαϊνές/πάνω-κάτω μπάρες: 16:9 -> cover */
+    /* Header (τίτλος/υπότιτλος) */
+    .header{
+      border-radius:14px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.75));
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding:10px 12px; text-align:center;
+      box-shadow: inset 0 0 0 1px rgba(15,23,42,.06);
+    }
+    .title{
+      margin:0 0 4px; font-weight:800;
+      font-size: clamp(16px, 2.2vw, 20px);
+      color:#0f172a;
+    }
+    .subtitle{
+      margin:0; color:#64748b;
+      font-size: clamp(12px, 1.6vw, 14px);
+    }
+
+    /* Περιοχή βίντεο – καλύπτει ολόκληρη τη ζώνη του χωρίς μαύρες μπάρες */
+    .player-zone{ position:relative; border-radius:14px; overflow:hidden; background:#000; }
+
     .player-fit{
       position:absolute; inset:0; overflow:hidden;
     }
     .player-fit iframe{
       position:absolute; top:50%; left:50%;
-      width:177.78%;   /* 16/9 ως ποσοστό του ύψους */
       height:100%;
-      transform:translate(-50%,-50%) scaleX(1.02); /* μικρό fill χωρίς μαύρες άκρες */
+      width:177.78%;                     /* 16:9 ως ποσοστό του ύψους → cover */
+      transform:translate(-50%,-50%) scaleX(1.02); /* μικρό fill για να μη φανούν άκρες */
       transform-origin:center;
       border:0; display:block; background:transparent;
-      pointer-events:none; /* αν θες χειρισμό controls, αφαίρεσέ το */
+      pointer-events:none; /* αφαίρεσέ το αν θέλεις χειρισμό controls με κλικ */
     }
 
-    /* Ολόκληρη επιφάνεια κλικάρει προς το shop (προαιρετικό) */
+    /* Click-through προς shop (προαιρετικό) */
     .clickthrough{
-      position:absolute; inset:0; z-index:2; display:block; text-decoration:none;
-      cursor:pointer;
+      position:absolute; inset:0; z-index:2; display:block; text-decoration:none; cursor:pointer;
     }
 
-    /* Σκούρα λειτουργία: μόνο ενίσχυση των “δαχτυλιδιών” */
     @media (prefers-color-scheme: dark){
-      .frame{ background:
-        radial-gradient(140% 100% at 10% 0%, rgba(99,102,241,.35), transparent 60%),
-        radial-gradient(140% 100% at 100% 20%, rgba(16,185,129,.35), transparent 60%),
-        #0f172a; box-shadow:0 12px 40px rgba(0,0,0,.45); }
+      .frame{
+        background:
+          radial-gradient(140% 100% at 10% 0%, rgba(99,102,241,.35), transparent 60%),
+          radial-gradient(140% 100% at 100% 20%, rgba(16,185,129,.35), transparent 60%),
+          #0f172a;
+        box-shadow:0 12px 40px rgba(0,0,0,.45);
+      }
+      .header{ background:linear-gradient(180deg, rgba(17,24,39,.65), rgba(17,24,39,.55)); }
+      .title{ color:#e5e7eb; }
+      .subtitle{ color:#9ca3af; }
     }
 
-    /* Μικρές οθόνες: κράτα τις καμπύλες ίδιες */
     @media (max-width:420px){
       .frame{ border-radius:16px; }
-      .frame-inner{ inset:12px; border-radius:12px; }
+      .frame-inner{ inset:10px; border-radius:12px; gap:8px; }
+      .header{ border-radius:12px; }
+      .player-zone{ border-radius:12px; }
     }
   </style>
 </head>
@@ -74,17 +100,29 @@
   <div class="embed-root">
     <div class="frame">
       <div class="frame-inner">
-        <div class="player-fit">
-          <iframe
-            src="https://www.youtube.com/embed/hoWjbZ95eLI?autoplay=1&mute=1&loop=1&playlist=hoWjbZ95eLI&rel=0&playsinline=1&controls=1&modestbranding=1"
-            title="YouTube video"
-            allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen></iframe>
-          <a class="clickthrough"
-             href="https://fairygift.gr/collections/prototypa-xrisima-dora-neogennita-genethlia-giorti-vaptisi-mora-vrefi"
-             target="_blank" rel="nofollow noopener"
-             aria-label="Δες τη συλλογή δώρων"></a>
+        <!-- ===== Header (ΤΙΤΛΟΣ + ΥΠΟΤΙΤΛΟΣ) ===== -->
+        <div class="header">
+          <h3 class="title">Η ευχή σου είναι ξεχωριστή… το δώρο σου όμως είναι?? 🎁</h3>
+          <p class="subtitle">Ένα προσωποποιημένο δώρο ξεχωρίζει από τα συνηθισμένα!!</p>
         </div>
+
+        <!-- ===== Video (1:1 περιοχή) ===== -->
+        <div class="player-zone">
+          <div class="player-fit">
+            <iframe
+              src="https://www.youtube.com/embed/hoWjbZ95eLI?autoplay=1&mute=1&loop=1&playlist=hoWjbZ95eLI&rel=0&playsinline=1&controls=1&modestbranding=1"
+              title="YouTube video"
+              allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen></iframe>
+
+            <!-- Αν θες όλο το βίντεο να οδηγεί στο shop, άσε αυτό ενεργό -->
+            <a class="clickthrough"
+               href="https://fairygift.gr/collections/prototypa-xrisima-dora-neogennita-genethlia-giorti-vaptisi-mora-vrefi"
+               target="_blank" rel="nofollow noopener"
+               aria-label="Δες τη συλλογή δώρων"></a>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
