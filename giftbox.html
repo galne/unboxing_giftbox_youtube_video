@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>FairyGift Video Embed</title>
   <style>
-    /* --------- Βασικά --------- */
+    /* ===== Βασικά ===== */
     * { box-sizing: border-box; }
     html, body { margin:0; padding:0; background:transparent; }
 
@@ -16,141 +16,139 @@
       --radius-outer: 20px;
       --radius-inner: 16px;
 
-      /* Ύψη */
-      --header-h: 100px;   /* desktop: λίγο πιο ψηλό ώστε να χωράνε άνετα τα μεγαλύτερα γράμματα */
-      --spacer-h: 8px;     /* μικρό κενάκι ανάμεσα στα πλαίσια */
+      /* Ύψη/κενά (desktop) */
+      --header-h: 100px;   /* τίτλος/υπότιτλος */
+      --spacer-h: 8px;     /* κενάκι πάνω/κάτω */
+      --footer-h: 84px;    /* κάτω μήνυμα */
     }
-    /* Στο κινητό κρατάμε όπως ήταν */
+    /* Mobile: λίγο μεγαλύτερο header για άνεση */
     @media (max-width: 480px){
-      :root{ --header-h: 70px; }
+      :root{
+        --header-h: 86px;
+        --footer-h: 88px;
+      }
     }
 
     .wrap { max-width: 680px; margin: 0 auto; }
 
-    /* --------- HEADER (ορθογώνιο) --------- */
-    .header{
-      position: relative;
-      height: var(--header-h);
-      border-radius: var(--radius-outer);
-      box-shadow: var(--shadow);
-      overflow: hidden;                        /* clip για να μένουν όλα μέσα */
-      display: grid; place-items: center;
+    /* ===== Κοινό background για κάρτες ===== */
+    .card-bg{
       background:
         radial-gradient(140% 100% at 10% 0%, var(--ring1), transparent 60%),
         radial-gradient(140% 100% at 100% 20%, var(--ring2), transparent 60%),
         #ffffff;
+      box-shadow: var(--shadow);
+      border-radius: var(--radius-outer);
+      overflow: hidden;
+      position: relative;
     }
-    /* Εσωτερικό panel με ::before – χωρίς λευκές άκρες */
-    .header::before{
-      content:"";
-      position:absolute; inset:8px;
-      border-radius:14px;
+
+    /* ===== HEADER (Τίτλος/Υπότιτλος) ===== */
+    .header.card-bg{
+      height: var(--header-h);
+      display:grid; place-items:center;
+    }
+    .panel-inner{
+      position:absolute; inset:8px; border-radius:14px;
       background: linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.75));
       box-shadow: inset 0 0 0 1px rgba(15,23,42,.06);
     }
     .header-content{
-      position: relative; z-index:1;           /* επάνω από το ::before */
-      text-align:center; padding:6px 12px; width: 100%;
-      overflow: hidden;                         /* clip γράμματα */
+      position: relative; z-index:1; width:100%;
+      padding: 6px 14px; text-align:center; overflow:hidden;
     }
-
-    /* ΤΥΠΟΓΡΑΦΙΑ – βασικά (κινητό & μικρές οθόνες) */
+    /* βασικά μεγέθη (ταιριάζουν στο mobile και μικρά desktop) */
     .title{
       margin:0 0 4px; font-weight:800; color:#0f172a;
-      font-size: clamp(16px, 2.6vw, 20px);
-      line-height: 1.18;
-      text-wrap: balance;
+      font-size: clamp(16px, 2.6vw, 22px);
+      line-height: 1.18; text-wrap: balance;
     }
     .subtitle{
       margin:0; color:#64748b;
-      font-size: clamp(12px, 1.9vw, 14px);
+      font-size: clamp(12px, 1.9vw, 16px);
       line-height: 1.2;
     }
-    /* ΜΟΝΟ ΓΙΑ DESKTOP – πιο μεγάλα αλλά εντός πλαισίου */
-    @media (min-width: 900px){
+    /* Μεγαλύτερα μόνο σε φαρδιά desktop */
+    @media (min-width: 1024px){
       .title{ font-size: 26px; }
       .subtitle{ font-size: 17px; }
     }
 
-    /* --------- SPACER (ίδιο background, χωρίς “ραφές”) --------- */
-    .between-spacer{
+    /* ===== Spacer ===== */
+    .spacer{
       height: var(--spacer-h);
+      margin: -1px 0 10px;                 /* μικρή επικάλυψη για να μην φανούν “ραφές” */
       border-radius: 10px;
-      box-shadow: var(--shadow);
-      background:
-        radial-gradient(140% 100% at 10% 0%, var(--ring1), transparent 60%),
-        radial-gradient(140% 100% at 100% 20%, var(--ring2), transparent 60%),
-        #ffffff;
-      margin: -1px 0 10px;   /* μικρή επικάλυψη για να μη φαίνεται γραμμή */
     }
+    .spacer.card-bg{ border-radius:10px; }
 
-    /* --------- ΤΕΤΡΑΓΩΝΟ VIDEO (1:1) --------- */
-    .frame{
-      position: relative;
-      border-radius: var(--radius-outer);
-      box-shadow: var(--shadow);
-      padding: 12px;
-      background:
-        radial-gradient(140% 100% at 10% 0%, var(--ring1), transparent 60%),
-        radial-gradient(140% 100% at 100% 20%, var(--ring2), transparent 60%),
-        #ffffff;
-    }
+    /* ===== Τετράγωνο Video 1:1 ===== */
+    .frame.card-bg{ padding:12px; }
     .square{
-      width: 100%;
-      aspect-ratio: 1 / 1;                 /* τετράγωνο */
+      width: 100%; aspect-ratio: 1 / 1;
       border-radius: var(--radius-inner);
-      overflow: hidden;
-      background: #000;
-      position: relative;
+      overflow: hidden; background:#000; position: relative;
     }
-
-    /* Γέμισμα του 1:1 από 16:9 video (cover) */
     .player-fit{ position:absolute; inset:0; overflow:hidden; }
     .player-fit iframe{
       position:absolute; top:50%; left:50%;
-      height:100%;
-      width:177.78%;                        /* 16/9 ως ποσοστό του ύψους */
+      height:100%; width:177.78%;                 /* 16:9 → cover */
       transform:translate(-50%,-50%) scaleX(1.02);
-      transform-origin:center;
-      border:0; display:block; background:transparent;
-      pointer-events:none;                  /* βγάλ’ το για χειρισμό controls */
+      transform-origin:center; border:0; display:block; background:transparent;
+      pointer-events:none;                         /* βγάλ’ το αν θες χειρισμό controls */
     }
-
-    /* Ολόκληρο το video κλικάρει προς το shop (προαιρετικό) */
     .clickthrough{
       position:absolute; inset:0; z-index:2; display:block; text-decoration:none; cursor:pointer;
     }
 
-    /* Dark mode */
+    /* ===== Κάτω μήνυμα ===== */
+    .footer.card-bg{
+      height: var(--footer-h);
+      display:grid; place-items:center;
+    }
+    .footer .panel-inner{ inset:10px; }
+    .footer-content{
+      position: relative; z-index:1; width:100%;
+      padding: 8px 14px; text-align:center; overflow:hidden;
+    }
+    .footer-text{
+      margin:0; color:#0f172a; font-weight:700;
+      font-size: clamp(14px, 2.2vw, 18px);
+      line-height:1.25; text-wrap: balance;
+    }
+
+    /* ===== Σκούρο θέμα ===== */
     @media (prefers-color-scheme: dark){
-      .header, .between-spacer, .frame{
+      .card-bg{
         background:
           radial-gradient(140% 100% at 10% 0%, rgba(99,102,241,.35), transparent 60%),
           radial-gradient(140% 100% at 100% 20%, rgba(16,185,129,.35), transparent 60%),
           #0f172a;
         box-shadow: 0 12px 40px rgba(0,0,0,.45);
       }
-      .header::before{ background: linear-gradient(180deg, rgba(17,24,39,.65), rgba(17,24,39,.55)); }
-      .title{ color:#e5e7eb; }
+      .panel-inner{ background: linear-gradient(180deg, rgba(17,24,39,.65), rgba(17,24,39,.55)); }
+      .title, .footer-text{ color:#e5e7eb; }
       .subtitle{ color:#9ca3af; }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <!-- ΟΡΘΟΓΩΝΙΟ HEADER -->
-    <div class="header">
+
+    <!-- Πάνω πλαίσιο: Τίτλος + Υπότιτλος -->
+    <div class="header card-bg">
+      <div class="panel-inner"></div>
       <div class="header-content">
         <h3 class="title">Η ευχή σου είναι ξεχωριστή… το δώρο σου όμως είναι?? 🎁</h3>
         <p class="subtitle">Ένα προσωποποιημένο δώρο ξεχωρίζει από τα συνηθισμένα!!</p>
       </div>
     </div>
 
-    <!-- ΜΙΚΡΟ SPACER (ίδιο background) -->
-    <div class="between-spacer"></div>
+    <!-- Spacer -->
+    <div class="spacer card-bg"></div>
 
-    <!-- ΤΕΤΡΑΓΩΝΟ VIDEO 1:1 -->
-    <div class="frame">
+    <!-- Τετράγωνο βίντεο 1:1 -->
+    <div class="frame card-bg">
       <div class="square">
         <div class="player-fit">
           <iframe
@@ -166,6 +164,18 @@
         </div>
       </div>
     </div>
+
+    <!-- Spacer -->
+    <div class="spacer card-bg"></div>
+
+    <!-- Κάτω πλαίσιο: μήνυμα -->
+    <div class="footer card-bg">
+      <div class="panel-inner"></div>
+      <div class="footer-content">
+        <p class="footer-text">Μην χάσεις την ευκαιρία να χαρίσεις ένα δώρο που θα θυμούνται για πάντα.</p>
+      </div>
+    </div>
+
   </div>
 </body>
 </html>
